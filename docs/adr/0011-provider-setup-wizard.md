@@ -1,6 +1,6 @@
 # ADR-0011: Provider setup wizard as a separate CLI
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-11-22
 
 ## Context
@@ -17,7 +17,7 @@ Create a separate setup wizard CLI rather than adding interactive behavior to th
 - write a local, ignored environment file with configuration values;
 - never print token values or commit generated secrets.
 
-The wizard will generate configuration only; runtime adapters remain non-interactive and receive explicit configuration.
+The first implementation reads the token from an environment variable. Interactive secret prompts may be added later. The wizard generates configuration only; runtime adapters remain non-interactive and receive explicit configuration.
 
 ## Consequences
 
