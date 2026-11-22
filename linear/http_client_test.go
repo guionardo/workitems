@@ -2,6 +2,7 @@ package linear
 
 import (
 	"context"
+	"encoding/json"
 	"io"
 	"net/http"
 	"strings"
@@ -20,9 +21,25 @@ func TestHTTPClientCreateIssue(t *testing.T) {
 		if request.Header.Get("Authorization") != "linear-token" {
 			t.Fatalf("missing Linear authorization")
 		}
+		var body struct {
+			Query     string `json:"query"`
+			Variables struct {
+				Input map[string]any `json:"input"`
+			} `json:"variables"`
+		}
+		if err := json.NewDecoder(request.Body).Decode(&body); err != nil {
+			t.Fatalf("decode request: %v", err)
+		}
+		if strings.Contains(body.Query, "labels(first:100)") {
+			return response(http.StatusOK, `{"data":{"team":{"labels":{"nodes":[{"id":"label-1","name":"bug"}]}}}}`), nil
+		}
+		labels, ok := body.Variables.Input["labelIds"].([]any)
+		if !ok || len(labels) != 1 || labels[0] != "label-1" {
+			t.Fatalf("labelIds = %#v", body.Variables.Input["labelIds"])
+		}
 		return response(http.StatusOK, `{"data":{"issueCreate":{"success":true,"issue":{"id":"id-1","identifier":"ENG-1","title":"Created","state":{"id":"todo","name":"Todo"},"labels":{"nodes":[]}}}}}`), nil
 	})
-	issue, err := client.CreateIssue(context.Background(), workitem.CreateTaskInput{Title: "Created"})
+	issue, err := client.CreateIssue(context.Background(), workitem.CreateTaskInput{Title: "Created", Tags: []string{"bug"}})
 	if err != nil {
 		t.Fatalf("HTTPClient.CreateIssue() error = %v", err)
 	}

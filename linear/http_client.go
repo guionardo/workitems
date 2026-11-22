@@ -83,7 +83,19 @@ func (c HTTPClient) CreateIssue(ctx context.Context, input workitem.CreateTaskIn
 			Issue   issueResponse `json:"issue"`
 		} `json:"issueCreate"`
 	}
-	variables := map[string]any{"input": map[string]any{"teamId": c.TeamID, "title": input.Title, "description": input.Description}}
+	issueInput := map[string]any{
+		"teamId":      c.TeamID,
+		"title":       input.Title,
+		"description": input.Description,
+	}
+	if len(input.Tags) > 0 {
+		labelIDs, err := c.labelIDs(ctx, input.Tags)
+		if err != nil {
+			return Issue{}, err
+		}
+		issueInput["labelIds"] = labelIDs
+	}
+	variables := map[string]any{"input": issueInput}
 	if err := c.query(ctx, `mutation($input:IssueCreateInput!) { issueCreate(input:$input) { success issue { `+issueFields+` } } }`, variables, &data); err != nil {
 		return Issue{}, err
 	}
@@ -91,6 +103,33 @@ func (c HTTPClient) CreateIssue(ctx context.Context, input workitem.CreateTaskIn
 		return Issue{}, errors.New("Linear issue creation was not successful")
 	}
 	return data.Mutation.Issue.issue(), nil
+}
+
+func (c HTTPClient) labelIDs(ctx context.Context, names []string) ([]string, error) {
+	var data struct {
+		Team struct {
+			Labels struct {
+				Nodes []Label `json:"nodes"`
+			} `json:"labels"`
+		} `json:"team"`
+	}
+	if err := c.query(ctx, `query($teamID:ID!) { team(id:$teamID) { labels(first:100) { nodes { id name } } } }`, map[string]any{"teamID": c.TeamID}, &data); err != nil {
+		return nil, err
+	}
+
+	byName := make(map[string]string, len(data.Team.Labels.Nodes))
+	for _, label := range data.Team.Labels.Nodes {
+		byName[label.Name] = label.ID
+	}
+	ids := make([]string, 0, len(names))
+	for _, name := range names {
+		id, ok := byName[name]
+		if !ok {
+			return nil, fmt.Errorf("Linear issue label %q was not found", name)
+		}
+		ids = append(ids, id)
+	}
+	return ids, nil
 }
 
 // SetIssueState updates a Linear issue's workflow state.
