@@ -23,6 +23,10 @@ task := workitem.Task{
 
 Provider-specific statuses can be mapped to the common `todo`, `in-progress`, `done`, and `unknown` statuses. Mappings are expected to be scoped to the relevant provider, board, or workflow.
 
+## Future improvements
+
+GitHub Projects V2 draft issues are a provider-specific lifecycle capability, not a canonical task status. A future optional `DraftTaskCreator` capability may create and publish draft items where the provider supports them; Jira, GitLab, and Azure DevOps should not be required to emulate this concept.
+
 The Jira adapter can be configured with an injected status mapper and HTTP client:
 
 ```go
