@@ -4,7 +4,7 @@
 
 ## Current status
 
-The project currently provides the canonical task model, external task references, configurable provider-status mapping, separate task capability contracts, and Jira and GitHub Issues adapters with standard-library HTTP clients. GitHub Projects, pull requests, advanced credential stores, retries, and observability are not implemented yet.
+The project currently provides the canonical task model, external task references, configurable provider-status mapping, separate task capability contracts, Jira and GitHub Issues adapters, and a GitHub Projects V2 adapter for issue-backed project items. Pull requests, advanced credential stores, retries, and observability are not implemented yet.
 
 The canonical model preserves both normalized and provider-native state:
 
@@ -90,6 +90,14 @@ GH_TOKEN="$GITHUB_API_TOKEN" gh api graphql \
 ```
 
 Copy `projectV2.id` to `GITHUB_PROJECT_ID`, copy the `id` of the field named `Status` to `GITHUB_STATUS_FIELD_ID`, and copy the option IDs by name. For an organization-owned project, replace `user(login:$login)` with `organization(login:$login)` in the query.
+
+The Projects V2 read-only integration check uses these values:
+
+```sh
+go test ./github -run TestGitHubProjectsIntegrationList -count=1 -v
+```
+
+The adapter supports listing, reading, and moving issue-backed project items. Pull requests and draft issues are excluded, and project-item creation is not implemented yet.
 
 For Jira, provide `JIRA_HOST`, `JIRA_EMAIL`, `JIRA_API_TOKEN`, and `JIRA_PROJECT` in `jira.env`, then run:
 
