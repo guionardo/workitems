@@ -2,3 +2,4 @@ jira.env
 github.env
 gitlab.env
 azuredevops.env
+linear.env

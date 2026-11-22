@@ -23,3 +23,4 @@ This directory records the project's relevant architectural decisions.
 - [0011 — Provider setup wizard as a separate CLI](0011-provider-setup-wizard.md)
 - [0012 — GitLab label-backed board status mapping](0012-gitlab-board-status-mapping.md)
 - [0013 — Azure DevOps Work Items provider boundary](0013-azure-devops-work-items-boundary.md)
+- [0014 — Linear Issues provider boundary](0014-linear-issues-boundary.md)
