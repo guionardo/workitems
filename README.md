@@ -66,6 +66,31 @@ go test ./github -run TestGitHubIntegrationCreateAndMove -count=1 -v
 
 Set `GITHUB_API_TOKEN` and `GITHUB_REPO=owner/repo` in `github.env`. Alternatively, use `GITHUB_OWNER` and a repository name separately. The test creates and closes a clearly labeled issue.
 
+### GitHub Projects V2 identifiers
+
+Projects V2 uses a project node ID, a status field node ID, and single-select option IDs. The visible project number (for example, `9`) is not the project ID used by GraphQL. Add these values to the local environment when the Projects V2 adapter is enabled:
+
+```sh
+GITHUB_PROJECT_NUMBER=9
+GITHUB_PROJECT_ID=PVT_...
+GITHUB_STATUS_FIELD_ID=PVTSSF_...
+GITHUB_STATUS_TODO_OPTION_ID=...
+GITHUB_STATUS_IN_PROGRESS_OPTION_ID=...
+GITHUB_STATUS_DONE_OPTION_ID=...
+```
+
+Use the GitHub CLI to discover them without exposing the token:
+
+```sh
+set -a; source github.env; set +a
+GH_TOKEN="$GITHUB_API_TOKEN" gh api graphql \
+  -f query='query($login:String!, $number:Int!) { user(login:$login) { projectV2(number:$number) { id number title fields(first:100) { nodes { ... on ProjectV2SingleSelectField { id name options { id name } } } } } } }' \
+  -F login="$GITHUB_OWNER" \
+  -F number="$GITHUB_PROJECT_NUMBER"
+```
+
+Copy `projectV2.id` to `GITHUB_PROJECT_ID`, copy the `id` of the field named `Status` to `GITHUB_STATUS_FIELD_ID`, and copy the option IDs by name. For an organization-owned project, replace `user(login:$login)` with `organization(login:$login)` in the query.
+
 For Jira, provide `JIRA_HOST`, `JIRA_EMAIL`, `JIRA_API_TOKEN`, and `JIRA_PROJECT` in `jira.env`, then run:
 
 ```sh
