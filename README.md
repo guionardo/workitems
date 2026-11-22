@@ -44,7 +44,20 @@ go vet ./...
 gofmt -w .
 ```
 
-When Jira or GitHub integration variables are available, `go test ./...` also runs the corresponding read/write integration test. Without them, the test is skipped. To run the GitHub test explicitly:
+## Integration tests
+
+Integration tests are opt-in. They are skipped when their required environment variables are absent, so the default `go test ./...` remains safe for local and CI runs without provider credentials.
+
+Create local, ignored environment files with named variables. Never commit real tokens:
+
+```sh
+# github.env
+GITHUB_API_TOKEN=replace-with-a-test-token
+GITHUB_OWNER=guionardo
+GITHUB_REPO=workitems
+```
+
+The GitHub test creates an Issue, reads it back, and closes it through the adapter. It leaves the Issue in the repository with the `workitems-integration-test` label. Run it explicitly after loading the variables:
 
 ```sh
 set -a; source github.env; set +a
@@ -53,14 +66,14 @@ go test ./github -run TestGitHubIntegrationCreateAndMove -count=1 -v
 
 Set `GITHUB_API_TOKEN` and `GITHUB_REPO=owner/repo` in `github.env`. Alternatively, use `GITHUB_OWNER` and a repository name separately. The test creates and closes a clearly labeled issue.
 
-To run the Jira test explicitly:
+For Jira, provide `JIRA_HOST`, `JIRA_EMAIL`, `JIRA_API_TOKEN`, and `JIRA_PROJECT` in `jira.env`, then run:
 
 ```sh
 set -a; source jira.env; set +a
 go test ./jira -run TestJiraIntegrationCreateAndMove -count=1 -v
 ```
 
-The integration test creates a clearly labeled test issue and moves it through one available transition.
+The Jira test creates a clearly labeled test issue and moves it through one available transition. Both tests perform write operations and should use dedicated test projects or repositories.
 
 Architecture decisions are recorded in [`docs/adr`](docs/adr/README.md).
 
