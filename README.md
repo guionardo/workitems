@@ -27,6 +27,8 @@ Provider-specific statuses can be mapped to the common `todo`, `in-progress`, `d
 
 GitHub Projects V2 draft issues are a provider-specific lifecycle capability, not a canonical task status. A future optional `DraftTaskCreator` capability may create and publish draft items where the provider supports them; Jira, GitLab, and Azure DevOps should not be required to emulate this concept.
 
+Provider setup wizard is also planned as a separate CLI tool. It will discover provider-specific project, board, field, label, status, and option IDs; validate access; and generate an ignored environment file without printing tokens.
+
 The Jira adapter can be configured with an injected status mapper and HTTP client:
 
 ```go
