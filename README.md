@@ -4,7 +4,7 @@
 
 ## Current status
 
-The project currently provides the canonical task model, external task references, configurable provider-status mapping, separate task capability contracts, Jira, GitHub Issues, GitHub Projects V2, and GitLab Issues adapters. Pull requests, advanced credential stores, retries, and observability are not implemented yet.
+The project currently provides the canonical task model, external task references, configurable provider-status mapping, separate task capability contracts, Jira, GitHub Issues, GitHub Projects V2, GitLab Issues, and label-backed GitLab Issue Board adapters. Pull requests, advanced credential stores, retries, and observability are not implemented yet.
 
 The canonical model preserves both normalized and provider-native state:
 
@@ -136,7 +136,13 @@ set -a; source gitlab.env; set +a
 go test ./gitlab -run TestGitLabIntegrationCreateAndMove -count=1 -v
 ```
 
-The GitLab test creates a clearly labeled issue and closes it. GitLab Issues support `todo` and `done` in the initial adapter; custom issue-board lists are a future integration.
+The GitLab test creates a clearly labeled issue and closes it. The plain Issues adapter supports `todo` and `done`; the BoardAdapter adds label-backed custom statuses.
+
+With `GITLAB_BOARD_ID` and the board labels configured, the board integration test creates an issue with `todo`, moves it through `in-progress` and `done`, and verifies the canonical status:
+
+```sh
+go test ./gitlab -run TestGitLabBoardIntegrationCreateAndMove -count=1 -v
+```
 
 Architecture decisions are recorded in [`docs/adr`](docs/adr/README.md).
 

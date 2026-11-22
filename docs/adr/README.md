@@ -21,3 +21,4 @@ This directory records the project's relevant architectural decisions.
 - [0009 — GitHub Projects issue-backed item creation](0009-github-project-item-creation.md)
 - [0010 — GitLab Issues provider boundary](0010-gitlab-issues-boundary.md)
 - [0011 — Provider setup wizard as a separate CLI](0011-provider-setup-wizard.md)
+- [0012 — GitLab label-backed board status mapping](0012-gitlab-board-status-mapping.md)

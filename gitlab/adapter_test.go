@@ -31,6 +31,26 @@ func (f *fakeClient) SetIssueState(_ context.Context, _ int, state string) (Issu
 	return f.issue, nil
 }
 
+func (f *fakeClient) UpdateIssue(_ context.Context, _ int, labels []string, stateEvent string) (Issue, error) {
+	f.state = stateEvent
+	f.issue.Labels = append([]string(nil), labels...)
+	if stateEvent == "close" {
+		f.issue.State = "closed"
+	}
+	if stateEvent == "reopen" {
+		f.issue.State = "opened"
+	}
+	return f.issue, nil
+}
+
+type fakeBoardClient struct {
+	lists []BoardList
+}
+
+func (f *fakeBoardClient) ListBoardLists(context.Context, int) ([]BoardList, error) {
+	return f.lists, nil
+}
+
 func TestAdapterGetTask(t *testing.T) {
 	t.Parallel()
 	adapter := NewAdapter(&fakeClient{issue: Issue{IID: 12, Title: "Fix bug", State: "opened", Labels: []string{"bug"}}})
@@ -81,5 +101,50 @@ func TestAdapterRejectsInProgress(t *testing.T) {
 	_, err := adapter.MoveTask(context.Background(), workitem.TaskRef{Provider: Provider, ID: "4"}, workitem.StatusInProgress)
 	if err != ErrStatusUnsupported {
 		t.Errorf("Adapter.MoveTask() error = %v, want %v", err, ErrStatusUnsupported)
+	}
+}
+
+func TestBoardAdapterListTasksMapsLabelStatus(t *testing.T) {
+	t.Parallel()
+	client := &fakeClient{page: IssuePage{Issues: []Issue{{IID: 1, Title: "Doing", State: "opened", Labels: []string{"in-progress"}}}}}
+	board := &fakeBoardClient{lists: []BoardList{{ID: 1, Type: "label", Label: "in-progress"}}}
+	mapper := workitem.NewStatusMapper([]workitem.StatusMapping{
+		{ProviderStatus: workitem.ProviderStatus{ID: "label:in-progress", Name: "in-progress"}, Status: workitem.StatusInProgress},
+		{ProviderStatus: workitem.ProviderStatus{ID: "open", Name: "Open"}, Status: workitem.StatusTodo},
+		{ProviderStatus: workitem.ProviderStatus{ID: "closed", Name: "Closed"}, Status: workitem.StatusDone},
+	})
+	adapter := NewBoardAdapter(client, client, board, 1, mapper)
+
+	page, err := adapter.ListTasks(context.Background(), workitem.ListOptions{})
+	if err != nil {
+		t.Fatalf("BoardAdapter.ListTasks() error = %v", err)
+	}
+	if len(page.Tasks) != 1 || page.Tasks[0].Status != workitem.StatusInProgress {
+		t.Errorf("BoardAdapter.ListTasks() = %+v, want one in-progress task", page.Tasks)
+	}
+}
+
+func TestBoardAdapterMoveTaskChangesLabels(t *testing.T) {
+	t.Parallel()
+	client := &fakeClient{issue: Issue{IID: 2, Title: "Todo", State: "opened", Labels: []string{"todo", "priority"}}}
+	board := &fakeBoardClient{lists: []BoardList{
+		{ID: 1, Type: "label", Label: "todo"},
+		{ID: 2, Type: "label", Label: "in-progress"},
+	}}
+	mapper := workitem.NewStatusMapper([]workitem.StatusMapping{
+		{ProviderStatus: workitem.ProviderStatus{ID: "label:todo", Name: "todo"}, Status: workitem.StatusTodo},
+		{ProviderStatus: workitem.ProviderStatus{ID: "label:in-progress", Name: "in-progress"}, Status: workitem.StatusInProgress},
+	})
+	adapter := NewBoardAdapter(client, client, board, 1, mapper)
+
+	task, err := adapter.MoveTask(context.Background(), workitem.TaskRef{Provider: Provider, ID: "2"}, workitem.StatusInProgress)
+	if err != nil {
+		t.Fatalf("BoardAdapter.MoveTask() error = %v", err)
+	}
+	if !hasLabel(client.issue.Labels, "in-progress") || hasLabel(client.issue.Labels, "todo") || !hasLabel(client.issue.Labels, "priority") {
+		t.Errorf("BoardAdapter.MoveTask() labels = %v", client.issue.Labels)
+	}
+	if task.Status != workitem.StatusInProgress {
+		t.Errorf("BoardAdapter.MoveTask() status = %q, want %q", task.Status, workitem.StatusInProgress)
 	}
 }

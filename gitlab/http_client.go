@@ -103,6 +103,45 @@ func (c HTTPClient) SetIssueState(ctx context.Context, iid int, stateEvent strin
 	return response.issue(), nil
 }
 
+// UpdateIssue updates labels and optionally changes the state of an issue.
+func (c HTTPClient) UpdateIssue(ctx context.Context, iid int, labels []string, stateEvent string) (Issue, error) {
+	if iid < 1 || (stateEvent != "" && stateEvent != "close" && stateEvent != "reopen") {
+		return Issue{}, errors.New("gitlab issue update is invalid")
+	}
+	var response issueResponse
+	form := url.Values{"labels": {strings.Join(labels, ",")}}
+	if stateEvent != "" {
+		form.Set("state_event", stateEvent)
+	}
+	if err := c.do(ctx, http.MethodPut, "/issues/"+strconv.Itoa(iid), nil, form, &response); err != nil {
+		return Issue{}, err
+	}
+	return response.issue(), nil
+}
+
+// ListBoardLists lists the lists configured on a GitLab project board.
+func (c HTTPClient) ListBoardLists(ctx context.Context, boardID int) ([]BoardList, error) {
+	if boardID < 1 {
+		return nil, errors.New("gitlab board ID is required")
+	}
+	var response []boardListResponse
+	if err := c.do(ctx, http.MethodGet, "/boards/"+strconv.Itoa(boardID)+"/lists", nil, nil, &response); err != nil {
+		return nil, err
+	}
+	lists := make([]BoardList, 0, len(response))
+	for _, item := range response {
+		list := BoardList{ID: item.ID, Position: item.Position}
+		if item.Label != nil {
+			list.Type, list.LabelID, list.Label = "label", item.Label.ID, item.Label.Name
+		}
+		if item.Status != nil {
+			list.Type = "status"
+		}
+		lists = append(lists, list)
+	}
+	return lists, nil
+}
+
 func (c HTTPClient) do(ctx context.Context, method, endpoint string, query url.Values, body url.Values, target any) error {
 	_, err := c.doWithHeader(ctx, method, endpoint, query, body, target)
 	return err
@@ -172,8 +211,22 @@ type issueResponse struct {
 	Labels      []string `json:"labels"`
 }
 
+type boardListResponse struct {
+	ID       int `json:"id"`
+	Position int `json:"position"`
+	Label    *struct {
+		ID   int    `json:"id"`
+		Name string `json:"name"`
+	} `json:"label"`
+	Status *struct {
+		ID int `json:"id"`
+	} `json:"status"`
+}
+
 func (response issueResponse) issue() Issue {
 	return Issue{IID: response.IID, URL: response.WebURL, Title: response.Title, Description: response.Description, State: response.State, Labels: append([]string(nil), response.Labels...)}
 }
 
 var _ Client = HTTPClient{}
+var _ BoardClient = HTTPClient{}
+var _ IssueUpdater = HTTPClient{}
