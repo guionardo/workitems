@@ -3,3 +3,4 @@ github.env
 gitlab.env
 azuredevops.env
 linear.env
+gitea.env

@@ -4,7 +4,7 @@
 
 ## Current status
 
-The project currently provides the canonical task model, external task references, configurable provider-status mapping, separate task capability contracts, Jira, GitHub Issues, GitHub Projects V2, GitLab Issues, label-backed GitLab Issue Board adapters, and Azure DevOps Work Items. Pull requests, Linear support as a maintained provider, advanced credential stores, retries, and observability are not part of the current scope.
+The project currently provides the canonical task model, external task references, configurable provider-status mapping, separate task capability contracts, Jira, GitHub Issues, GitHub Projects V2, GitLab Issues, label-backed GitLab Issue Board adapters, Azure DevOps Work Items, and Gitea Issues. Pull requests, Linear support as a maintained provider, advanced credential stores, retries, and observability are not part of the current scope.
 
 The canonical model preserves both normalized and provider-native state:
 
@@ -154,6 +154,15 @@ go test ./azuredevops -run TestAzureDevOpsIntegrationCreateAndMove -count=1 -v
 ```
 
 Set `AZDO_STATE_TODO`, `AZDO_STATE_IN_PROGRESS`, and `AZDO_STATE_DONE` when the selected process uses custom state names. The test creates a Task and moves it to the configured done state.
+
+For Gitea, provide `GITEA_HOST` (optional), `GITEA_API_TOKEN`, `GITEA_OWNER`, and `GITEA_REPO` in `gitea.env`, then run:
+
+```sh
+set -a; source gitea.env; set +a
+go test ./gitea -run TestGiteaIntegrationCreateAndMove -count=1 -v
+```
+
+The Gitea test creates an issue and closes it. Tags must already exist in the repository because Gitea issue creation uses repository label IDs.
 
 Architecture decisions are recorded in [`docs/adr`](docs/adr/README.md).
 

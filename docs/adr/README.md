@@ -25,3 +25,4 @@ This directory records the project's relevant architectural decisions.
 - [0013 — Azure DevOps Work Items provider boundary](0013-azure-devops-work-items-boundary.md)
 - [0014 — Linear Issues provider boundary](0014-linear-issues-boundary.md)
 - [0015 — Defer Linear provider maintenance](0015-defer-linear-provider.md)
+- [0016 — Gitea Issues provider boundary](0016-gitea-issues-boundary.md)
