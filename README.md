@@ -44,7 +44,16 @@ go vet ./...
 gofmt -w .
 ```
 
-When Jira integration variables are available, `go test ./...` also runs the read/write Jira integration test. Without them, the test is skipped. To run it explicitly:
+When Jira or GitHub integration variables are available, `go test ./...` also runs the corresponding read/write integration test. Without them, the test is skipped. To run the GitHub test explicitly:
+
+```sh
+set -a; source github.env; set +a
+go test ./github -run TestGitHubIntegrationCreateAndMove -count=1 -v
+```
+
+Set `GITHUB_API_TOKEN` and `GITHUB_REPO=owner/repo` in `github.env`. Alternatively, use `GITHUB_OWNER` and a repository name separately. The test creates and closes a clearly labeled issue.
+
+To run the Jira test explicitly:
 
 ```sh
 set -a; source jira.env; set +a
