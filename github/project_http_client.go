@@ -88,6 +88,38 @@ func (c ProjectHTTPClient) SetProjectItemStatus(ctx context.Context, projectID, 
 	return data.Mutation.Item.item(fieldID), nil
 }
 
+// AddProjectItem adds an issue to the configured project and returns its current item data.
+func (c ProjectHTTPClient) AddProjectItem(ctx context.Context, projectID, contentID, statusFieldID string) (ProjectItem, error) {
+	var data struct {
+		Mutation struct {
+			Item projectItemResponse `json:"item"`
+		} `json:"addProjectV2ItemById"`
+	}
+	if err := c.query(ctx, projectAddItemMutation, map[string]any{
+		"projectID": projectID, "contentID": contentID,
+	}, &data); err != nil {
+		return ProjectItem{}, err
+	}
+	if data.Mutation.Item.ID == "" {
+		return ProjectItem{}, errors.New("GitHub project item was not returned after adding issue")
+	}
+	// shortcut: GitHub may expose the new item before its default Status value; retry briefly for consistency.
+	for attempt := 0; attempt < 5; attempt++ {
+		item, err := c.GetProjectItem(ctx, projectID, data.Mutation.Item.ID, statusFieldID)
+		if err != nil || item.ProviderStatus.ID != "" || attempt == 4 {
+			return item, err
+		}
+		timer := time.NewTimer(200 * time.Millisecond)
+		select {
+		case <-ctx.Done():
+			timer.Stop()
+			return ProjectItem{}, ctx.Err()
+		case <-timer.C:
+		}
+	}
+	return ProjectItem{}, errors.New("GitHub project item status was not available")
+}
+
 func (c ProjectHTTPClient) query(ctx context.Context, query string, variables map[string]any, target any) error {
 	if c.BaseURL == "" || c.Token == "" {
 		return errors.New("github projects client credentials are required")
@@ -245,6 +277,14 @@ const projectStatusMutation = `mutation($projectID: ID!, $itemID: ID!, $fieldID:
     value: { singleSelectOptionId: $optionID }
   }) {
     projectV2Item {
+      ` + projectItemFields + `
+    }
+  }
+}`
+
+const projectAddItemMutation = `mutation($projectID: ID!, $contentID: ID!) {
+  addProjectV2ItemById(input: { projectId: $projectID, contentId: $contentID }) {
+    item {
       ` + projectItemFields + `
     }
   }

@@ -19,6 +19,7 @@ var (
 
 // Issue is the GitHub issue data needed to build a canonical task.
 type Issue struct {
+	NodeID      string
 	Number      int
 	URL         string
 	Title       string

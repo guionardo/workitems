@@ -15,6 +15,7 @@ type fakeProjectClient struct {
 	itemID    string
 	fieldID   string
 	optionID  string
+	contentID string
 }
 
 func (f *fakeProjectClient) GetProjectItem(context.Context, string, string, string) (ProjectItem, error) {
@@ -28,6 +29,14 @@ func (f *fakeProjectClient) ListProjectItems(context.Context, string, string, st
 func (f *fakeProjectClient) SetProjectItemStatus(_ context.Context, projectID, itemID, fieldID, optionID string) (ProjectItem, error) {
 	f.projectID, f.itemID, f.fieldID, f.optionID = projectID, itemID, fieldID, optionID
 	f.item.ProviderStatus = workitem.ProviderStatus{ID: optionID, Name: "Done"}
+	return f.item, nil
+}
+
+func (f *fakeProjectClient) AddProjectItem(_ context.Context, projectID, contentID, fieldID string) (ProjectItem, error) {
+	f.projectID, f.contentID, f.fieldID = projectID, contentID, fieldID
+	if f.item.ID == "" {
+		f.item = ProjectItem{ID: "item-created", Type: "ISSUE", Title: "Created", ProviderStatus: workitem.ProviderStatus{ID: "todo", Name: "Todo"}}
+	}
 	return f.item, nil
 }
 
@@ -62,6 +71,24 @@ func TestProjectAdapterMoveTask(t *testing.T) {
 	}
 	if task.Status != workitem.StatusDone {
 		t.Errorf("ProjectAdapter.MoveTask() status = %q, want %q", task.Status, workitem.StatusDone)
+	}
+}
+
+func TestProjectAdapterCreateTask(t *testing.T) {
+	t.Parallel()
+	projectClient := &fakeProjectClient{}
+	issueClient := &fakeClient{issue: Issue{NodeID: "issue-node-1"}}
+	adapter := NewProjectAdapterWithIssueClient(projectClient, issueClient, "project", "status", projectMapper())
+
+	task, err := adapter.CreateTask(context.Background(), workitem.CreateTaskInput{Title: "Created"})
+	if err != nil {
+		t.Fatalf("ProjectAdapter.CreateTask() error = %v", err)
+	}
+	if projectClient.projectID != "project" || projectClient.contentID != "issue-node-1" || projectClient.fieldID != "status" {
+		t.Errorf("ProjectAdapter.CreateTask() request = project %q, content %q, field %q", projectClient.projectID, projectClient.contentID, projectClient.fieldID)
+	}
+	if task.Ref.ID != "item-created" {
+		t.Errorf("ProjectAdapter.CreateTask() ID = %q, want %q", task.Ref.ID, "item-created")
 	}
 }
 

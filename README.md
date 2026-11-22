@@ -96,9 +96,10 @@ The Projects V2 integration checks use these values:
 ```sh
 go test ./github -run TestGitHubProjectsIntegrationList -count=1 -v
 go test ./github -run TestGitHubProjectsIntegrationMove -count=1 -v
+go test ./github -run TestGitHubProjectsIntegrationCreate -count=1 -v
 ```
 
-The first test reads project items. The second finds an existing item labeled `workitems-integration-test`, moves it to `Done`, and reads it again. The adapter supports listing, reading, and moving issue-backed project items. Pull requests and draft issues are excluded, and project-item creation is not implemented yet.
+The first test reads project items. The second finds an existing item labeled `workitems-integration-test`, moves it to `Done`, and reads it again. The third creates an Issue, adds it to the project, and moves it to `Done`. The adapter supports creating, listing, reading, and moving issue-backed project items. Pull requests and draft issues are excluded.
 
 For Jira, provide `JIRA_HOST`, `JIRA_EMAIL`, `JIRA_API_TOKEN`, and `JIRA_PROJECT` in `jira.env`, then run:
 

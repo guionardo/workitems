@@ -176,6 +176,7 @@ func (c HTTPClient) doWithHeader(ctx context.Context, method, endpoint string, q
 }
 
 type issueResponse struct {
+	NodeID      string `json:"node_id"`
 	Number      int    `json:"number"`
 	HTMLURL     string `json:"html_url"`
 	Title       string `json:"title"`
@@ -193,7 +194,7 @@ func (response issueResponse) issue() Issue {
 		labels = append(labels, label.Name)
 	}
 	return Issue{
-		Number: response.Number, URL: response.HTMLURL, Title: response.Title,
+		NodeID: response.NodeID, Number: response.Number, URL: response.HTMLURL, Title: response.Title,
 		Body: response.Body, State: response.State, Labels: labels,
 		PullRequest: response.PullRequest != nil,
 	}
