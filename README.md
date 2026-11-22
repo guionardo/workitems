@@ -4,7 +4,7 @@
 
 ## Current status
 
-The project currently provides the canonical task model, external task references, configurable provider-status mapping, separate task capability contracts, Jira, GitHub Issues, GitHub Projects V2, GitLab Issues, and label-backed GitLab Issue Board adapters. Pull requests, advanced credential stores, retries, and observability are not implemented yet.
+The project currently provides the canonical task model, external task references, configurable provider-status mapping, separate task capability contracts, Jira, GitHub Issues, GitHub Projects V2, GitLab Issues, label-backed GitLab Issue Board adapters, and Azure DevOps Work Items. Pull requests, advanced credential stores, retries, and observability are not implemented yet.
 
 The canonical model preserves both normalized and provider-native state:
 
@@ -143,6 +143,15 @@ With `GITLAB_BOARD_ID` and the board labels configured, the board integration te
 ```sh
 go test ./gitlab -run TestGitLabBoardIntegrationCreateAndMove -count=1 -v
 ```
+
+For Azure DevOps, provide `AZDO_PAT`, `AZDO_ORGANIZATION`, and `AZDO_PROJECT` in `azuredevops.env`. The PAT needs work-item read/write access:
+
+```sh
+set -a; source azuredevops.env; set +a
+go test ./azuredevops -run TestAzureDevOpsIntegrationCreateAndMove -count=1 -v
+```
+
+Set `AZDO_STATE_TODO`, `AZDO_STATE_IN_PROGRESS`, and `AZDO_STATE_DONE` when the selected process uses custom state names. The test creates a Task and moves it to the configured done state.
 
 Architecture decisions are recorded in [`docs/adr`](docs/adr/README.md).
 
