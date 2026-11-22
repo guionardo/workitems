@@ -54,12 +54,13 @@ The setup wizard discovers provider-specific identifiers and writes a local envi
 
 ```sh
 GITHUB_API_TOKEN="$GITHUB_API_TOKEN" go run ./cmd/workitems-setup github-projects \
-  --owner guionardo --project-number 9 --output github.env
+  --owner guionardo --owner-type auto --project-number 9 --output github.env
 
 GITLAB_API_TOKEN="$GITLAB_API_TOKEN" go run ./cmd/workitems-setup gitlab-board \
   --project guionardo/workitems-testing --output gitlab.env
 ```
 
+GitHub `--owner-type` accepts `user`, `organization`, or `auto` (the default).
 Use `--force` only when intentionally replacing an existing file. The current wizard reads tokens from environment variables; interactive secret prompts are future work.
 
 ## Integration tests

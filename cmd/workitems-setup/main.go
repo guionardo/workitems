@@ -41,6 +41,7 @@ func runGitHub(args []string) error {
 	flags := flag.NewFlagSet("github-projects", flag.ContinueOnError)
 	tokenEnv := flags.String("token-env", "GITHUB_API_TOKEN", "environment variable containing the GitHub token")
 	owner := flags.String("owner", os.Getenv("GITHUB_OWNER"), "GitHub user or organization login")
+	ownerType := flags.String("owner-type", "auto", "GitHub owner type: auto, user, or organization")
 	projectNumber := flags.Int("project-number", envInt("GITHUB_PROJECT_NUMBER"), "GitHub Projects V2 number")
 	output := flags.String("output", "", "environment file to write; stdout when empty")
 	force := flags.Bool("force", false, "overwrite an existing output file")
@@ -51,41 +52,15 @@ func runGitHub(args []string) error {
 	if token == "" || strings.TrimSpace(*owner) == "" || *projectNumber < 1 {
 		return errors.New("GitHub token, owner, and a positive project number are required")
 	}
-	query := `query($login:String!, $number:Int!) { user(login:$login) { projectV2(number:$number) { id number fields(first:100) { nodes { ... on ProjectV2SingleSelectField { id name options { id name } } } } } } }`
-	var response struct {
-		Data struct {
-			User struct {
-				Project struct {
-					ID     string `json:"id"`
-					Number int    `json:"number"`
-					Fields struct {
-						Nodes []struct {
-							ID      string `json:"id"`
-							Name    string `json:"name"`
-							Options []struct {
-								ID   string `json:"id"`
-								Name string `json:"name"`
-							} `json:"options"`
-						} `json:"nodes"`
-					} `json:"fields"`
-				} `json:"projectV2"`
-			} `json:"user"`
-		}
-		Errors []struct {
-			Message string `json:"message"`
-		} `json:"errors"`
-	}
-	if err := graphql("https://api.github.com/graphql", token, query, map[string]any{"login": *owner, "number": *projectNumber}, &response); err != nil {
+	project, err := discoverGitHubProject(token, *owner, *projectNumber, *ownerType)
+	if err != nil {
 		return err
-	}
-	if len(response.Errors) > 0 || response.Data.User.Project.ID == "" {
-		return errors.New("GitHub project was not found; use organization-owned query for organization projects")
 	}
 	var status struct {
 		ID      string
 		Options map[string]string
 	}
-	for _, field := range response.Data.User.Project.Fields.Nodes {
+	for _, field := range project.Fields.Nodes {
 		if field.Name != "Status" {
 			continue
 		}
@@ -101,8 +76,8 @@ func runGitHub(args []string) error {
 	lines := []string{
 		"GITHUB_API_TOKEN=",
 		"GITHUB_OWNER=" + *owner,
-		"GITHUB_PROJECT_NUMBER=" + strconv.Itoa(response.Data.User.Project.Number),
-		"GITHUB_PROJECT_ID=" + response.Data.User.Project.ID,
+		"GITHUB_PROJECT_NUMBER=" + strconv.Itoa(project.Number),
+		"GITHUB_PROJECT_ID=" + project.ID,
 		"GITHUB_STATUS_FIELD_ID=" + status.ID,
 	}
 	for _, name := range []string{"todo", "in_progress", "done"} {
@@ -111,6 +86,58 @@ func runGitHub(args []string) error {
 		}
 	}
 	return writeOutput(*output, *force, lines)
+}
+
+type githubProject struct {
+	ID     string `json:"id"`
+	Number int    `json:"number"`
+	Fields struct {
+		Nodes []struct {
+			ID      string `json:"id"`
+			Name    string `json:"name"`
+			Options []struct {
+				ID   string `json:"id"`
+				Name string `json:"name"`
+			} `json:"options"`
+		} `json:"nodes"`
+	} `json:"fields"`
+}
+
+func discoverGitHubProject(token, owner string, number int, ownerType string) (githubProject, error) {
+	if ownerType != "auto" && ownerType != "user" && ownerType != "organization" {
+		return githubProject{}, errors.New("GitHub owner type must be auto, user, or organization")
+	}
+	for _, kind := range ownerTypes(ownerType) {
+		query := `query($login:String!, $number:Int!) { ` + kind + `(login:$login) { projectV2(number:$number) { id number fields(first:100) { nodes { ... on ProjectV2SingleSelectField { id name options { id name } } } } } } }`
+		var response struct {
+			Data struct {
+				User struct {
+					Project githubProject `json:"projectV2"`
+				} `json:"user"`
+				Organization struct {
+					Project githubProject `json:"projectV2"`
+				} `json:"organization"`
+			} `json:"data"`
+		}
+		if err := graphql("https://api.github.com/graphql", token, query, map[string]any{"login": owner, "number": number}, &response); err != nil {
+			return githubProject{}, err
+		}
+		project := response.Data.User.Project
+		if kind == "organization" {
+			project = response.Data.Organization.Project
+		}
+		if project.ID != "" {
+			return project, nil
+		}
+	}
+	return githubProject{}, errors.New("GitHub project was not found for the selected owner type")
+}
+
+func ownerTypes(ownerType string) []string {
+	if ownerType == "auto" {
+		return []string{"user", "organization"}
+	}
+	return []string{ownerType}
 }
 
 func runGitLab(args []string) error {

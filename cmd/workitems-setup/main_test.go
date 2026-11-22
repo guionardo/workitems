@@ -23,3 +23,23 @@ func TestWriteOutputProtectsExistingFile(t *testing.T) {
 		t.Errorf("writeOutput() wrote %q, want TOKEN=", string(data))
 	}
 }
+
+func TestOwnerTypes(t *testing.T) {
+	tests := []struct {
+		name string
+		kind string
+		want string
+	}{
+		{name: "auto", kind: "auto", want: "user,organization"},
+		{name: "user", kind: "user", want: "user"},
+		{name: "organization", kind: "organization", want: "organization"},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			got := strings.Join(ownerTypes(test.kind), ",")
+			if got != test.want {
+				t.Errorf("ownerTypes(%q) = %q, want %q", test.kind, got, test.want)
+			}
+		})
+	}
+}
