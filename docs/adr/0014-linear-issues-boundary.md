@@ -1,6 +1,6 @@
 # ADR-0014: Linear Issues provider boundary
 
-- Status: Accepted
+- Status: Superseded by ADR-0015
 - Date: 2026-11-22
 
 ## Context

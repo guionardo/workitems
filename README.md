@@ -4,7 +4,7 @@
 
 ## Current status
 
-The project currently provides the canonical task model, external task references, configurable provider-status mapping, separate task capability contracts, Jira, GitHub Issues, GitHub Projects V2, GitLab Issues, label-backed GitLab Issue Board adapters, Azure DevOps Work Items, and Linear Issues. Pull requests, advanced credential stores, retries, and observability are not implemented yet.
+The project currently provides the canonical task model, external task references, configurable provider-status mapping, separate task capability contracts, Jira, GitHub Issues, GitHub Projects V2, GitLab Issues, label-backed GitLab Issue Board adapters, and Azure DevOps Work Items. Pull requests, Linear support as a maintained provider, advanced credential stores, retries, and observability are not part of the current scope.
 
 The canonical model preserves both normalized and provider-native state:
 
@@ -28,6 +28,8 @@ Provider-specific statuses can be mapped to the common `todo`, `in-progress`, `d
 GitHub Projects V2 draft issues are a provider-specific lifecycle capability, not a canonical task status. A future optional `DraftTaskCreator` capability may create and publish draft items where the provider supports them; Jira, GitLab, and Azure DevOps should not be required to emulate this concept.
 
 The provider setup wizard is a separate CLI tool that discovers provider-specific project, board, field, label, status, and option IDs; validates access; and generates an ignored environment file without printing tokens. Interactive secret prompts remain future work.
+
+Linear support has been explored and remains in the repository as an experimental implementation. It is deferred from the maintained provider roadmap until there is enough demand to justify integration validation and ongoing compatibility work.
 
 The Jira adapter can be configured with an injected status mapper and HTTP client:
 
@@ -152,15 +154,6 @@ go test ./azuredevops -run TestAzureDevOpsIntegrationCreateAndMove -count=1 -v
 ```
 
 Set `AZDO_STATE_TODO`, `AZDO_STATE_IN_PROGRESS`, and `AZDO_STATE_DONE` when the selected process uses custom state names. The test creates a Task and moves it to the configured done state.
-
-For Linear, provide `LINEAR_API_KEY`, `LINEAR_TEAM_ID`, `LINEAR_STATE_TODO`, and `LINEAR_STATE_DONE` in `linear.env`, then run:
-
-```sh
-set -a; source linear.env; set +a
-go test ./linear -run TestLinearIntegrationCreateAndMove -count=1 -v
-```
-
-Linear workflow state IDs are team-specific and must be discovered from the team workflow configuration. The test creates an Issue and moves it to the configured done state.
 
 Architecture decisions are recorded in [`docs/adr`](docs/adr/README.md).
 

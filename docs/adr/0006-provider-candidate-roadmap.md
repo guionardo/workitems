@@ -17,12 +17,13 @@ The candidate providers and initial order are:
 | 2 | GitHub | Issues and Projects; no pull-request creation |
 | 3 | GitLab | Issues, labels, issue-board lists, status mapping |
 | 4 | Azure DevOps | Work items, tags, configurable states, queries |
-| 5 | Linear | Issues, labels, workflow states, list/get/create/move |
-| 6 | Gitea | Issues, labels, milestones, status mapping |
-| 7 | YouTrack | Issues, tags, custom state fields, agile-board context |
-| 8 | Trello | Cards, labels, lists, and list-based status |
-| 9 | Bitbucket | Pull-request read-only support first; issue support only if demand justifies it |
-| 10 | Forgejo | Evaluate after Gitea based on API compatibility and demand |
+| 5 | Gitea | Issues, labels, milestones, status mapping |
+| 6 | YouTrack | Issues, tags, custom state fields, agile-board context |
+| 7 | Trello | Cards, labels, lists, and list-based status |
+| 8 | Bitbucket | Pull-request read-only support first; issue support only if demand justifies it |
+| 9 | Forgejo | Evaluate after Gitea based on API compatibility and demand |
+
+Linear is deferred. An exploratory implementation remains available in the repository, but it is not part of the maintained provider order until user demand justifies integration validation and compatibility maintenance.
 
 Pull requests and merge requests are not part of the generic task-creation contract. They may be added later as explicit read-only or change-request capabilities.
 
@@ -41,6 +42,5 @@ Adapters should be prioritized by:
 - Jira is first because `gh-eva` already contains integration knowledge and security-tested HTTP behavior.
 - GitHub and GitLab validate repository-centric issue boards and project-specific state mapping.
 - Azure DevOps is prioritized for its relevance and broad work-item, tag, state, and query model.
-- Linear remains an important later adapter that validates GraphQL and workflow-state integration.
 - Bitbucket PR support remains separate from generic task creation.
 - The order can change through a new ADR when demand or provider constraints change.
