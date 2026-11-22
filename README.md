@@ -4,7 +4,7 @@
 
 ## Current status
 
-The project currently provides the canonical task model, external task references, configurable provider-status mapping, separate task capability contracts, Jira and GitHub Issues adapters, and a GitHub Projects V2 adapter for issue-backed project items. Pull requests, advanced credential stores, retries, and observability are not implemented yet.
+The project currently provides the canonical task model, external task references, configurable provider-status mapping, separate task capability contracts, Jira, GitHub Issues, GitHub Projects V2, and GitLab Issues adapters. Pull requests, advanced credential stores, retries, and observability are not implemented yet.
 
 The canonical model preserves both normalized and provider-native state:
 
@@ -113,6 +113,15 @@ go test ./jira -run TestJiraIntegrationCreateAndMove -count=1 -v
 ```
 
 The Jira test creates a clearly labeled test issue and moves it through one available transition. Both tests perform write operations and should use dedicated test projects or repositories.
+
+For GitLab, provide `GITLAB_HOST` (optional), `GITLAB_API_TOKEN`, and `GITLAB_PROJECT` in `gitlab.env`, then run:
+
+```sh
+set -a; source gitlab.env; set +a
+go test ./gitlab -run TestGitLabIntegrationCreateAndMove -count=1 -v
+```
+
+The GitLab test creates a clearly labeled issue and closes it. GitLab Issues support `todo` and `done` in the initial adapter; custom issue-board lists are a future integration.
 
 Architecture decisions are recorded in [`docs/adr`](docs/adr/README.md).
 

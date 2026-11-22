@@ -19,3 +19,4 @@ This directory records the project's relevant architectural decisions.
 - [0007 — Jira client boundary](0007-jira-client-boundary.md)
 - [0008 — GitHub Projects V2 provider boundary](0008-github-projects-v2-boundary.md)
 - [0009 — GitHub Projects issue-backed item creation](0009-github-project-item-creation.md)
+- [0010 — GitLab Issues provider boundary](0010-gitlab-issues-boundary.md)
