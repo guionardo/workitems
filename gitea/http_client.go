@@ -115,7 +115,7 @@ func (c HTTPClient) SetIssueState(ctx context.Context, index int, state string) 
 		return Issue{}, errors.New("gitea issue state is invalid")
 	}
 	var response issueResponse
-	if err := c.do(ctx, http.MethodPatch, "/issues/"+strconv.Itoa(index), nil, map[string]any{"closed": state == "closed"}, &response); err != nil {
+	if err := c.do(ctx, http.MethodPatch, "/issues/"+strconv.Itoa(index), nil, map[string]any{"state": state}, &response); err != nil {
 		return Issue{}, err
 	}
 	return response.issue(), nil

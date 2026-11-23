@@ -60,6 +60,27 @@ func TestHTTPClientListIssues(t *testing.T) {
 	}
 }
 
+func TestHTTPClientSetIssueState(t *testing.T) {
+	t.Parallel()
+	client := testHTTPClient(func(request *http.Request) (*http.Response, error) {
+		var body map[string]string
+		if err := json.NewDecoder(request.Body).Decode(&body); err != nil {
+			t.Fatalf("decode request: %v", err)
+		}
+		if body["state"] != "closed" {
+			t.Fatalf("state = %#v", body["state"])
+		}
+		return response(http.StatusCreated, `{"number":4,"title":"Task","state":"closed","labels":[]}`), nil
+	})
+	issue, err := client.SetIssueState(context.Background(), 4, "closed")
+	if err != nil {
+		t.Fatalf("SetIssueState() error = %v", err)
+	}
+	if issue.State != "closed" {
+		t.Fatalf("SetIssueState() = %+v", issue)
+	}
+}
+
 func testHTTPClient(fn roundTripFunc) HTTPClient {
 	client := NewHTTPClient("https://gitea.test", "gitea-token", "acme", "app")
 	client.HTTP = &http.Client{Transport: fn}
