@@ -164,6 +164,8 @@ go test ./gitea -run TestGiteaIntegrationCreateAndMove -count=1 -v
 
 The Gitea test creates an issue and closes it. Tags must already exist in the repository because Gitea issue creation uses repository label IDs.
 
+The same adapter was validated against Codeberg by setting `GITEA_HOST=https://codeberg.org`; use the same `GITEA_API_TOKEN`, `GITEA_OWNER`, and `GITEA_REPO` variables for a disposable Codeberg repository.
+
 Architecture decisions are recorded in [`docs/adr`](docs/adr/README.md).
 
 The current provider candidate order is documented in [ADR-0006](docs/adr/0006-provider-candidate-roadmap.md).

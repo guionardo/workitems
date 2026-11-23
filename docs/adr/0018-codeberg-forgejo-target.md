@@ -14,3 +14,5 @@ Treat Codeberg as a Forgejo-compatible deployment target of the Gitea adapter. V
 ## Consequences
 
 Users can configure the existing Gitea client with `https://codeberg.org` when the API behavior is compatible. Codeberg-specific integration coverage remains future work, and the adapter must not assume compatibility without an actual test.
+
+The Gitea integration test was validated successfully against `https://codeberg.org` using a disposable repository, confirming the initial issue create-and-close flow without Codeberg-specific code.
