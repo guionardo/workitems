@@ -4,7 +4,7 @@
 
 ## Current status
 
-The project currently provides the canonical task model, external task references, configurable provider-status mapping, separate task capability contracts, Jira, GitHub Issues, GitHub Projects V2, GitLab Issues, label-backed GitLab Issue Board adapters, Azure DevOps Work Items, and Gitea Issues. Pull requests, Linear support as a maintained provider, advanced credential stores, retries, and observability are not part of the current scope.
+The project currently provides the canonical task model, external task references, configurable provider-status mapping, separate task capability contracts, Jira, GitHub Issues, GitHub Projects V2, GitLab Issues, label-backed GitLab Issue Board adapters, Azure DevOps Work Items, Gitea Issues, and Trello Cards. Pull requests, Linear support as a maintained provider, advanced credential stores, retries, and observability are not part of the current scope.
 
 The canonical model preserves both normalized and provider-native state:
 
@@ -165,6 +165,15 @@ go test ./gitea -run TestGiteaIntegrationCreateAndMove -count=1 -v
 The Gitea test creates an issue and closes it. Tags must already exist in the repository because Gitea issue creation uses repository label IDs.
 
 The same adapter was validated against Codeberg by setting `GITEA_HOST=https://codeberg.org`; use the same `GITEA_API_TOKEN`, `GITEA_OWNER`, and `GITEA_REPO` variables for a disposable Codeberg repository.
+
+For Trello, provide `TRELLO_API_KEY`, `TRELLO_TOKEN`, `TRELLO_BOARD_ID`, `TRELLO_LIST_TODO`, and `TRELLO_LIST_DONE` in `trello.env`, then run:
+
+```sh
+set -a; source trello.env; set +a
+go test ./trello -run TestTrelloIntegrationCreateAndMove -count=1 -v
+```
+
+Trello list IDs are provider statuses. The test creates a card in the configured todo list and moves it to the configured done list. `TRELLO_LIST_IN_PROGRESS` can be used when configuring a mapper for a third list.
 
 Architecture decisions are recorded in [`docs/adr`](docs/adr/README.md).
 

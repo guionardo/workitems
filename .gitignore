@@ -5,3 +5,4 @@ azuredevops.env
 linear.env
 gitea.env
 codeberg.env
+trello.env
