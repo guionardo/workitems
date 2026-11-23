@@ -23,6 +23,10 @@ task := workitem.Task{
 
 Provider-specific statuses can be mapped to the common `todo`, `in-progress`, `done`, and `unknown` statuses. Mappings are expected to be scoped to the relevant provider, board, or workflow.
 
+## Architecture overview
+
+Each provider adapter translates provider payloads into the canonical `workitem.Task` model. Provider clients own authentication and HTTP/GraphQL details; adapters own validation, status mapping, and capability-specific behavior. `TaskReader`, `TaskCreator`, and `TaskMover` are independent interfaces, so a provider exposes only the operations it supports. See the [provider capability matrix](docs/provider-capabilities.md) for the current boundaries.
+
 ## Future improvements
 
 GitHub Projects V2 draft issues are a provider-specific lifecycle capability, not a canonical task status. A future optional `DraftTaskCreator` capability may create and publish draft items where the provider supports them; Jira, GitLab, and Azure DevOps should not be required to emulate this concept.

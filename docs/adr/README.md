@@ -2,6 +2,8 @@
 
 This directory records the project's relevant architectural decisions.
 
+The current provider capability summary is maintained in [`provider-capabilities.md`](../provider-capabilities.md).
+
 ## Convention
 
 - Files use the `NNNN-short-title.md` format.
