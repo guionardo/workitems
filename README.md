@@ -1,6 +1,6 @@
 # workitems
 
-`workitems` is a Go library for working with tasks from different providers through a common model. It is intended to support providers such as GitHub Issues, GitHub Projects, Jira, and GitLab Issues without exposing provider-specific workflow details to consumers.
+`workitems` is a Go library for working with task boards and work-item workflows across different providers. It provides a canonical task model and provider adapters for querying, creating, and moving tasks while mapping provider-specific statuses to common workflow states and preserving native metadata. The library is designed for issue trackers and project-board systems such as GitHub, Jira, GitLab, Azure DevOps, and Gitea.
 
 ## Current status
 
