@@ -27,3 +27,4 @@ This directory records the project's relevant architectural decisions.
 - [0015 — Defer Linear provider maintenance](0015-defer-linear-provider.md)
 - [0016 — Gitea Issues provider boundary](0016-gitea-issues-boundary.md)
 - [0017 — Defer YouTrack provider](0017-defer-youtrack-provider.md)
+- [0018 — Codeberg as a Forgejo-compatible target](0018-codeberg-forgejo-target.md)
