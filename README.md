@@ -4,7 +4,7 @@
 
 ## Current status
 
-The project currently provides the canonical task model, external task references, configurable provider-status mapping, separate task capability contracts, Jira, GitHub Issues, GitHub Projects V2, GitLab Issues, label-backed GitLab Issue Board adapters, Azure DevOps Work Items, and Gitea Issues. Pull requests, Linear and Trello support as maintained providers, advanced credential stores, retries, and observability are not part of the current scope.
+The maintained providers are Jira, GitHub Issues, GitHub Projects V2, GitLab Issues and Boards, Azure DevOps Work Items, and Gitea Issues. Linear and Trello remain experimental and deferred. Pull requests, advanced credential stores, retries, and observability are not part of the current scope.
 
 The canonical model preserves both normalized and provider-native state:
 
@@ -54,8 +54,9 @@ The project requires Go 1.27 or later.
 
 ```sh
 go test ./...
+go test -race ./...
 go vet ./...
-gofmt -w .
+gofmt -w $(find . -type f -name '*.go')
 ```
 
 The setup wizard discovers provider-specific identifiers and writes a local environment file without copying the token:
@@ -135,7 +136,7 @@ set -a; source jira.env; set +a
 go test ./jira -run TestJiraIntegrationCreateAndMove -count=1 -v
 ```
 
-The Jira test creates a clearly labeled test issue and moves it through one available transition. Both tests perform write operations and should use dedicated test projects or repositories.
+The Jira test creates a clearly labeled test issue and moves it through one available transition. Integration tests perform write operations and should use dedicated test projects or repositories.
 
 For GitLab, provide `GITLAB_HOST` (optional), `GITLAB_API_TOKEN`, and `GITLAB_PROJECT` in `gitlab.env`, then run:
 
