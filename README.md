@@ -2,6 +2,12 @@
 
 `workitems` is a Go library for working with task boards and work-item workflows across different providers. It provides a canonical task model and provider adapters for querying, creating, and moving tasks while mapping provider-specific statuses to common workflow states and preserving native metadata. The library is designed for issue trackers and project-board systems such as GitHub, Jira, GitLab, Azure DevOps, and Gitea.
 
+## Motivation and objective
+
+This project is inspired by practical experience with `gh-eva` and `ariadne`, AI-assisted development agents that use task boards to coordinate and manage software work. Those projects highlighted the need for a consistent way to operate on tasks across providers without losing provider-specific workflow information.
+
+The objective of `workitems` is to provide a reusable Go library for agents, automation, and other tools that need to query, create, and move tasks across different boards and issue systems. It is a provider abstraction layer, not an AI-agent framework; orchestration, planning, and agent behavior remain the responsibility of its consumers.
+
 ## Current status
 
 The maintained providers are Jira, GitHub Issues, GitHub Projects V2, GitLab Issues and Boards, Azure DevOps Work Items, and Gitea Issues. Linear and Trello remain experimental and deferred. Pull requests, advanced credential stores, retries, and observability are not part of the current scope.
