@@ -1,6 +1,6 @@
 # ADR-0019: Trello Cards provider boundary
 
-- Status: Accepted
+- Status: Superseded by ADR-0020
 - Date: 2026-11-23
 
 ## Context

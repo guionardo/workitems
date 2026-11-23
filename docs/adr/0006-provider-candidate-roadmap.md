@@ -18,15 +18,16 @@ The candidate providers and initial order are:
 | 3 | GitLab | Issues, labels, issue-board lists, status mapping |
 | 4 | Azure DevOps | Work items, tags, configurable states, queries |
 | 5 | Gitea | Issues, labels, milestones, status mapping |
-| 6 | Trello | Cards, labels, lists, and list-based status |
-| 7 | Bitbucket | Pull-request read-only support first; issue support only if demand justifies it |
-| 8 | Forgejo / Codeberg | Validate the Gitea adapter against Forgejo-compatible hosted services |
+| 6 | Bitbucket | Pull-request read-only support first; issue support only if demand justifies it |
+| 7 | Forgejo / Codeberg | Validate the Gitea adapter against Forgejo-compatible hosted services |
 
 Linear is deferred. An exploratory implementation remains available in the repository, but it is not part of the maintained provider order until user demand justifies integration validation and compatibility maintenance.
 
 YouTrack is deferred until there is enough demand to justify provider-specific API research and integration validation.
 
 Codeberg is grouped with Forgejo because it is a hosted Forgejo service and should initially reuse the Gitea-compatible adapter rather than introduce a duplicate provider boundary.
+
+Trello is deferred. An exploratory implementation remains available in the repository, but it is not part of the maintained provider order until API-token onboarding is practical for the project.
 
 Pull requests and merge requests are not part of the generic task-creation contract. They may be added later as explicit read-only or change-request capabilities.
 
